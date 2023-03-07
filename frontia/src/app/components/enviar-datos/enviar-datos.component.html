@@ -1,0 +1,77 @@
+<div class="container text-center">
+<h1>REGISTRO DE DATOS</h1>
+<form name="postForm" #postForm="ngForm" (ngSubmit)="sendForm(postForm)">
+    <p>
+        <span>rating: </span>
+        <input type="text" name="rating" #rating="ngModel" [(ngModel)]="modelo.rating">
+    </p>
+    <p>
+        <span>sector: </span>
+        <select name="sector" #sector="ngModel" [(ngModel)]="modelo.sector">
+            <option value="Health Care">Health Care</option>
+            <option value="Business Service">Business Service</option>
+            <option value="Information technology">Information technology</option>
+            <option value="Other">Other</option>
+        </select>
+        <input *ngIf="modelo.sector=='Other'" name="sector_o" #sector_o="ngModel" [(ngModel)]="sector_ot">
+    </p>
+    <p>
+        <span>ownership: </span>
+        <select name="ownership" #ownership="ngModel" [(ngModel)]="modelo.ownership">
+            <option value="Private">Private</option>
+            <option value="Public">Public</option>
+            <option value="Nonprofit Organization">Nonprofit Organization</option>
+            <option value="Other">Other</option>
+        </select>
+        <input *ngIf="modelo.ownership=='Other'" name="ownership_o" #ownership_o="ngModel" [(ngModel)]="ownership_ot">
+    </p>
+    <p>
+        <span>job_title: </span>
+        <select name="job_title" #job_title="ngModel" [(ngModel)]="modelo.job_title">
+            <option value="Data scientist">Data scientist</option>
+            <option value="Data analyst">Data analyst</option>
+            <option value="Other">Other</option>
+        </select>
+        <input *ngIf="modelo.job_title=='Other'" name="job_title_o" #job_title_o="ngModel" [(ngModel)]="job_title_ot">
+
+    </p>
+    <p>
+        <span>job_in_headquarters: </span>
+        <input type="text" name="job_in_headquarters" #job_in_headquarters="ngModel" [(ngModel)]="modelo.job_in_headquarters">
+    </p>
+    <p>
+        <span>job_seniority: </span>
+        <input type="text" name="job_seniority" #job_seniority="ngModel" [(ngModel)]="modelo.job_seniority">
+    </p>
+    
+        <span>job_skills: </span>
+        <div>
+        <label for="checkbox1">Excel: </label>
+        <input type="checkbox" name="skl1" #skl1="ngModel" [(ngModel)]="skills[0]" value="Excel">
+        </div>
+        <div>
+        <label for="checkbox2">Tableau: </label>
+        <input type="checkbox" name="skl2" #skl1="ngModel" [(ngModel)]="skills[1]" value="Tableau">
+        </div>
+        <div>
+        <label for="checkbox3">Python: </label>
+        <input type="checkbox" name="skl3" #skl1="ngModel" [(ngModel)]="skills[2]" value="Python">
+        </div>
+        <div>
+        <label for="checkbox3">SQL: </label>
+        <input type="checkbox" name="skl4" #skl1="ngModel" [(ngModel)]="skills[3]" value="SQL">
+        </div>
+        <!--
+        <div>
+        <label for="checkbox3">Other: </label>
+        <input type="checkbox" name="skl5" #skl1="ngModel" [(ngModel)]="skills[4]" value="Other">
+        </div>
+        -->
+    <input type="submit" value="Guardar" [disabled]="!postForm.form.valid">
+</form>
+
+<div class="resultado" *ngIf="messages!=null">
+    <div class="{{messages.status}}">{{messages.message}}</div>
+</div>
+
+</div>

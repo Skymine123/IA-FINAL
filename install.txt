@@ -1,0 +1,8 @@
+pip install Flask-Ext
+pip install flask-mandrill
+pip install flask-mandrill
+
+### para exportar librerias locales como archivo requirements
+pip freeze > req.txt
+
+pip install -r req.txt
