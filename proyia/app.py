@@ -7,6 +7,7 @@ from flask import json
 import numpy as np
 import pickle
 import os
+from tensorflow import keras
 import joblib
 # In[2]:
 app = Flask(__name__)
@@ -25,6 +26,11 @@ def predecir_Salario(rating, sector, ownership, job_title, job_in_headquarters, 
   sc_rating = pickle.load(file) 
 
 
+ with open(fileDirectory+"/scaler.pkl", "rb") as file:
+  scaler = pickle.load(file) 
+  
+ with open(fileDirectory+"/pca_model.pkl", "rb") as file:
+  pca = pickle.load(file)
 
  prediction_input.append(sc_rating.transform(np.array(rating).reshape(1, -1)))
 
@@ -73,6 +79,9 @@ def predecir_Salario(rating, sector, ownership, job_title, job_in_headquarters, 
  
 
  modelo = joblib.load(fileDirectory+'/random_forest.joblib') 
+ prediction_input=scaler.transform(np.reshape(prediction_input,(1, -1)))
+ prediction_input=pca.transform(prediction_input)
+ prediction_input = np.array(prediction_input).flatten()
  return modelo.predict([prediction_input])
 
 ######
@@ -89,6 +98,11 @@ def predecir_Salario1(rating, sector, ownership, job_title, job_in_headquarters,
  with open(fileDirectory+"/sc_rating.pkl", "rb") as file:
   sc_rating = pickle.load(file) 
 
+ with open(fileDirectory+"/scaler.pkl", "rb") as file:
+  scaler = pickle.load(file) 
+  
+ with open(fileDirectory+"/pca_model.pkl", "rb") as file:
+  pca = pickle.load(file)
 
 
  prediction_input.append(sc_rating.transform(np.array(rating).reshape(1, -1)))
@@ -138,6 +152,79 @@ def predecir_Salario1(rating, sector, ownership, job_title, job_in_headquarters,
  
 
  modelo = joblib.load(fileDirectory+'/voting_regressor.joblib') 
+ prediction_input=scaler.transform(np.reshape(prediction_input,(1, -1)))
+ prediction_input=pca.transform(prediction_input)
+ prediction_input = np.array(prediction_input).flatten()
+ return modelo.predict([prediction_input])[0]
+
+
+def predecir_Salario2(rating, sector, ownership, job_title, job_in_headquarters, job_seniority, job_skills):
+ 
+ absolutepath = os.path.abspath(__file__)
+ fileDirectory = os.path.dirname(absolutepath)
+  
+ prediction_input = list()
+ print(fileDirectory)
+
+ with open(fileDirectory+"/sc_rating.pkl", "rb") as file:
+  sc_rating = pickle.load(file) 
+
+ with open(fileDirectory+"/scaler.pkl", "rb") as file:
+  scaler = pickle.load(file) 
+  
+ with open(fileDirectory+"/pca_model.pkl", "rb") as file:
+  pca = pickle.load(file)
+
+ prediction_input.append(sc_rating.transform(np.array(rating).reshape(1, -1)))
+
+ sector_columns = ['sector_Health Care','sector_Business Services','sector_Information Technology']
+ temp = list(map(int, np.zeros(shape=(1, len(sector_columns)))[0]))
+ for index in range(0, len(sector_columns)):
+    if sector_columns[index] == 'sector_' + sector:
+      temp[index] = 1
+      break
+ prediction_input = prediction_input + temp
+
+
+ if ownership == 'Private':
+    prediction_input.append(1)
+ else:
+    prediction_input.append(0)
+  
+
+ job_title_columns = ['job_title_data scientist', 'job_title_data analyst']
+ temp = list(map(int, np.zeros(shape=(1, len(job_title_columns)))[0]))
+ for index in range(0, len(job_title_columns)):
+    if job_title_columns[index] == 'job_title_' + job_title:
+      temp[index] = 1
+      break
+ prediction_input = prediction_input + temp
+
+
+ prediction_input.append(job_in_headquarters)
+
+
+ job_seniority_map = {'other': 0, 'jr': 1, 'sr': 2}
+ prediction_input.append(job_seniority_map[job_seniority])
+
+
+ temp = list(map(int, np.zeros(shape=(1, 4))[0]))
+ if 'excel' in job_skills:
+    temp[0] = 1
+ if 'python' in job_skills:
+    temp[1] = 1
+ if 'tableau' in job_skills:
+    temp[2] = 1
+ if 'sql' in job_skills:
+    temp[3] = 1
+ prediction_input = prediction_input + temp
+ 
+
+ modelo = keras.models.load_model(fileDirectory+'\\model.h5') 
+ h3=np.array(prediction_input)
+ prediction_input=scaler.transform(h3.reshape(1, -1))
+ prediction_input=pca.transform(prediction_input)
+ prediction_input
  return modelo.predict([prediction_input])[0]
  
 from flask import Flask,request
@@ -178,11 +265,11 @@ def obtener_datos():
    print(job_skills)   
    salary=predecir_Salario(rating,sector,ownership,job_title,job_in_headquarters,job_seniority,job_skills)
    salary1=predecir_Salario1(rating,sector,ownership,job_title,job_in_headquarters,job_seniority,job_skills)
+   salary2=predecir_Salario2(rating,sector,ownership,job_title,job_in_headquarters,job_seniority,job_skills)
    texto='Salario Estimado FOREST REGRESSOR (rango): {}(USD) a {}(USD) por año.'.format((int(salary*1000)-9000), (int(salary*1000)+9000))
    texto1='Salario Estimado VOTING REGRESSOR (rango): {}(USD) a {}(USD) por año.'.format((int(salary1*1000)-9000), (int(salary1*1000)+9000))
-   texto2=texto+"\n"+texto1
-   print(texto2)
-   return json.dumps({"message":texto2})
+   texto2='Salario Estimado VOTING REGRESSOR (rango): {}(USD) a {}(USD) por año.'.format((int(salary2*1000)-9000), (int(salary2*1000)+9000))
+   return json.dumps({"Message":texto,"Prediccion votting regressor":texto1,"Prediccion red neuronal":texto2})
 
 
 

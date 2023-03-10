@@ -1,6 +1,6 @@
-# fly.toml file generated for proyia on 2023-03-09T21:59:09-05:00
+# fly.toml file generated for proyeia on 2023-03-10T01:51:06-05:00
 
-app = "proyia"
+app = "proyeia"
 kill_signal = "SIGINT"
 kill_timeout = 5
 primary_region = "mia"
@@ -10,7 +10,7 @@ processes = []
   builder = "paketobuildpacks/builder:base"
 
 [env]
- Port="8080"
+ 
 
 [experimental]
   auto_rollback = true
